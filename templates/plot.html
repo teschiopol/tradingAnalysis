@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Plot</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+	<meta charset="UTF-8">
+</head>
+<body>
+	{% block pagebody %}
+    <canvas id="myChart" ></canvas>
+	<!----<div style="width: 1200px; height: 350px;"><canvas id="ddChart" ></canvas> </div>--->
+	
+	<style type="text/css">
+		#myChart{
+  			height:650px !important;
+  			width: 1100px !important;
+  			margin-right:20px !important;
+  			margin-left:20px !important;
+		}
+		/*
+		#ddChart{
+  			height:300px !important;
+  			width: 1100px !important;
+  			margin-right:20px !important;
+  			margin-left:20px !important;
+		}
+		*/
+	</style>
+	<script>
+	let stateObj = { id: "100" }; 
+    //window.history.replaceState(stateObj, "Plot", "/graph");
+
+	var ctx = document.getElementById('myChart').getContext('2d');
+	var myChart = new Chart(ctx, {
+	    type: 'line',
+	    data: {
+	        labels: [ {% for m in lab %}'{{m}}',{% endfor %}  ],
+	        datasets: [
+
+	        	{% for l in sup %}
+	        		{
+	        		label: "{{l[2][0]}}",
+		            data: {{l[0]}},
+		            backgroundColor: [
+		            	'rgba(0, 0, 0, 0)'
+		            ],
+		            borderColor: [
+		            	'rgb({{l[3][0]}},{{l[3][1]}},{{l[3][2]}})'
+		            ],
+		            lineTension: 0.1
+		        	},
+		        	{
+	        		label: "dd {{l[2][0]}}",
+		            data: {{l[1]}},
+		            backgroundColor: [
+		            	'rgba(0, 0, 0, 0)'
+		            ],
+		            borderColor: [
+		            	'rgb({{l[3][0]}},{{l[3][1]}},{{l[3][2]}})'
+		            ],
+		            lineTension: 0.1
+		        	},
+	        	{% endfor %}
+	        ]
+	    },
+	    options: {
+	    	responsive: true,
+		    maintainAspectRatio: false,
+	        scales: {
+	            yAxes: [{
+	                ticks: {
+	                    beginAtZero: true
+	                },
+	                gridLines:{
+	                	zeroLineColor: 'black'
+	                }
+	            }]
+	        },
+	        legend: {
+	        	position: 'top',
+	        	
+       			onClick: function(e, legendItem) {
+          			var index = legendItem.datasetIndex;
+          			var ci = this.chart;
+          			ci.getDatasetMeta(index).hidden = (ci.getDatasetMeta(index).hidden === null) ? true : null;
+          			ci.getDatasetMeta(index+1).hidden = (ci.getDatasetMeta(index+1).hidden === null) ? true : null;
+          			/*
+          			var alreadyHidden = (ci.getDatasetMeta(index).hidden === null) ? false : ci.getDatasetMeta(index).hidden;
+
+          			ci.data.datasets.forEach(function(e, i) {
+			            var meta = ci.getDatasetMeta(i);
+
+			            if (i !== index) {
+			            	if (!alreadyHidden) {
+			            		meta.hidden = meta.hidden === null ? !meta.hidden : null;
+			            	} else if (meta.hidden === null) {
+			                	meta.hidden = true;
+			            	}
+			            } else if (i === index) {
+			            	meta.hidden = null;
+			            }
+			        });
+					*/
+		        	ci.update();
+		        },
+		        labels: {
+	                filter: function(item, chart) {
+	                    return !item.text.includes('dd');
+	                }
+            	}
+	        }
+	    }
+	});
+	/*
+	var rtx = document.getElementById('ddChart').getContext('2d');
+	var ddChart = new Chart(rtx, {
+	    type: 'line',
+	    data: {
+	        labels: [ {% for n in ddlab %}'{{n}}',{% endfor %}  ],
+	        datasets: [
+	        	{% for g in ddd %}
+	        		{
+	        		label: "dd {{g[1][0]}}",
+		            data: {{g[0]}},
+		            backgroundColor: [
+		            	'rgba(0, 0, 0, 0)'
+		            ],
+		            borderColor: [
+		            	'rgb({{g[2][0]}},{{g[2][1]}},{{g[2][2]}})'
+		            ],
+		            lineTension: 0.1
+		        	},
+	        	{% endfor %}
+	        ]    
+	    },
+	    options: {
+	    	responsive: true,
+		    maintainAspectRatio: false,
+	        scales: {
+	            yAxes: [{
+	                ticks: {
+	                    beginAtZero: true
+	                },
+	                gridLines:{
+	                	zeroLineColor: 'black'
+	                }
+	            }]
+	        }
+	    }
+	});
+	*/
+	</script>
+	{% endblock %}
+</body>
+</html>
+
+

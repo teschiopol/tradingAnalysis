@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Scelta Plot</title>
+	<meta charset="UTF-8">
+</head>
+<body>
+	{% block pagebody %}
+	<form action="/cerca" method="POST" style="margin: auto; margin-bottom: 20px;" name="frmCerca">
+		<input type="hidden"  autocomplete="off"  name="dal"  id="dal" value="{{da}}">
+		<input type="hidden"  autocomplete="off"  name="al"  id="al" value="{{a}}">
+   		<input type="hidden" name="n_contratti" id="n_contratti" value="{{contratti}}" autocomplete="off"  required="true">
+   		<input type="hidden" name="flagDario" id="flagDario" value="1">
+   		<div id="strategia" name="strategia">
+   		{% for l in strategie %}
+			<label><input name="col" value="{{ l[0] }}" id="c{{l[0]}}" type="checkbox" checked="true" >&nbsp;{{ l[1] }}</label><br>
+		{% endfor %}
+		</div>
+	</form>
+	<button style="font-family: sans-serif; width: 100px; border-color: orange; height: 30px; font-size: 15px;color: white; background-color: black;" onclick="myFunction();">PLOT</button>
+	<script type="text/javascript">
+		function myFunction() {
+  			var dataI = document.getElementById('dal').value;
+			var dataF = document.getElementById('al').value;
+			var contrat = document.getElementById('n_contratti').value;
+			var strategie = document.getElementById('strategia').children;
+			var strat = [];
+			for (var i = 0; i < strategie.length; i = i + 2) {
+				if (strategie[i].children[0].checked){
+					strat.push(strategie[i].children[0].value);
+				}
+			}
+			if (strat.length == 0 ){
+				alert('Selezionare almeno uno');
+			}
+
+			location.href = ('plot?dataI='+ dataI + '&dataF=' + dataF + '&contrat=' + contrat + '&strategie=' + strat );	
+		}
+	</script>
+	{% endblock %}
+</body>
+</html>

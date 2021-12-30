@@ -1,0 +1,596 @@
+{% extends "base.html" %}
+
+<!--- Homepage --->
+
+{% block pagebody %}
+<div style="width: 70%; margin: auto; position: relative; left: 35%; transform: translate(-50%); font-size: 12px; font-family: 'Helvetica"><br>
+	<form action="/cerca" method="POST" style="margin: auto; margin-bottom: 20px;" name="frmCerca">
+		<label for="oggi">Data Ultima:</label>
+		<input type="text"  autocomplete="off" readonly="true" value="{{ today }}" style="margin-bottom: 15px; width: 80px; " name="oggi"  id="oggi">
+		<label for="maxdd" style="display: none">Max DD:</label>
+		<input type="text"  autocomplete="off" readonly="true" style="margin-bottom: 15px; width: 100px; display: none" name="maxdd" value="0" id="maxdd">
+		<input type="hidden" name="flagDario" id="flagDario" value="0">
+		<label style="margin-left: 30px;" for="dal">Dal</label>
+		<input type="text"  autocomplete="off" style="margin-bottom: 15px; width: 80px;" name="dal"  id="dal">
+		<label style="margin-left: 30px;" for="al">Al</label>
+		<input type="text"  autocomplete="off" style="margin-bottom: 15px; width: 80px;" name="al"  id="al">
+		{% if anni is defined %}
+		<span id="loading" style="color: red; font-size: 18px; font-weight: bold; display: block;">&nbsp;LOADING...</span>
+		{% endif %}
+		<br>
+		<div>
+    		<button onclick="dropDown(event);" class="menu-btn" type="button" id="men-drop" style="margin-right: 30px;">
+        	Strategie &#9013;
+    		</button>
+    		<div class="d-none shadow rounded menu" id="strategia" name="strategia">
+        		<span class="d-block menu-option"><label><input id="col" name="col" value="" type="checkbox">&nbsp;Tutti</label></span>
+        		{% for r in reports %}
+              		<span class="d-block menu-option"><label><input name="col" value="{{ r[0] }}" id="c{{r[0]}}" type="checkbox" >&nbsp;{{ r[1] }}</label></span>
+        		{% endfor %}
+    		</div>
+    		<label for="n_contratti">N° Contratti: </label>
+    		<input type="number" name="n_contratti" id="n_contratti" value="{% if molt is defined %}{{'%.0f'|format(molt)}}{% else %}1{% endif %}" autocomplete="off" style="width: 40px; margin-right: 30px; border-color: #cecdcd; border-radius: 5px;" required="true">
+    		<button type="submit" style="margin-bottom: 15px; border-radius: 10px; margin-right: 30px; width: 60px; background: black; color: orange; border-color: black;" >Cerca</button>
+			<input type="button"  style="color: black; background-color: orange; width: 60px; border-radius: 10px; border-color: orange; margin-right: 30px;" onclick="reset();" value="Reset">
+			{% if anni is defined %}
+			<input type="button"  style="color: orange; background-color: white; width: 60px; border-radius: 10px; border-color: orange; margin-right: 30px;" onclick="{% if darietto == '1' %}plotD();{% else%}plot();{% endif%}" value="Plot">
+			<input type="button"  style="color: orange; background-color: black; width: 60px; border-radius: 10px; border-color: orange; margin-right: 30px; border-color: black;" onclick="dario();" value="Dario">
+			{% if darietto == '1' %}
+			Dario ON
+			{% endif %}
+			<script type="text/javascript">
+				{% for h in html_sup %}
+					if ({{h[2]}} == 1) {document.getElementById('c{{h[0]}}').checked = true; }
+				{% endfor %}
+			</script>
+			{% endif %}
+		</div>
+		<span onclick="tendina();">Selezionati {{n_report}} di {{tot_report}} : <div id="selTendina" style="display: none;"><ul>{% for r in rep %}<li>{{ r.name }}</li>{% endfor %}</ul></div></span>
+	</form>
+	<script type="text/javascript">
+		function dropDown(event) {
+    		event.target.parentElement.children[1].classList.remove("d-none");
+    		document.getElementById('men-drop').onclick = hide;
+		}
+
+		function hide(event) {
+    		var items = document.getElementsByClassName('menu');
+    		for (let i = 0; i < items.length; i++) {
+        		items[i].classList.add("d-none");
+    		}
+		    document.getElementById('men-drop').onclick = dropDown;
+		}
+
+		function tendina(){
+			var el = document.getElementById('selTendina').style.display;
+			if (el == 'none'){
+				document.getElementById('selTendina').style.display = 'block';
+			}else{
+				document.getElementById('selTendina').style.display = 'none';
+			}
+		}
+
+		function plotD(){
+			var dataI = document.getElementById('dal').value;
+			var dataF = document.getElementById('al').value;
+			var contrat = document.getElementById('n_contratti').value;
+			var strategie = document.getElementById('strategia').children;
+			var strat = [];
+			for (var i = 0; i < strategie.length; i++) {
+				if (strategie[i].children[0].children[0].checked){
+					strat.push(strategie[i].children[0].children[0].value);
+				}
+			}
+			if (strat.length == 0 || strat[0] == ''){
+				strat = [0];
+			}
+			
+			// close dialog e poi open plot
+			window.open('intermediate?dataI='+ dataI + '&dataF=' + dataF + '&contrat=' + contrat + '&strategie=' + strat ,"","width=1200,height=700");
+		}
+
+		function plot(){
+			var dataI = document.getElementById('dal').value;
+			var dataF = document.getElementById('al').value;
+			var contrat = document.getElementById('n_contratti').value;
+			var strategie = document.getElementById('strategia').children;
+			var strat = [];
+			for (var i = 0; i < strategie.length; i++) {
+				if (strategie[i].children[0].children[0].checked){
+					strat.push(strategie[i].children[0].children[0].value);
+				}
+			}
+			if (strat.length == 0 || strat[0] == ''){
+				strat = [0];
+			}
+			window.open('plot?dataI='+ dataI + '&dataF=' + dataF + '&contrat=' + contrat + '&strategie=' + strat ,"","width=1200,height=700");	
+		}
+
+		function dario(){
+			var dataI = document.getElementById('dal').value;
+			var dataF = document.getElementById('al').value;
+			var contrat = document.getElementById('n_contratti').value;
+			var strategie = document.getElementById('strategia').children;
+			var strat = [];
+			for (var i = 0; i < strategie.length; i++) {
+				if (strategie[i].children[0].children[0].checked){
+					strat.push(strategie[i].children[0].children[0].value);
+				}
+			}
+			if (strat.length == 0 || strat[0] == ''){
+				strat = [0];
+			}
+			window.open('dario?dataI='+ dataI + '&dataF=' + dataF + '&contrat=' + contrat + '&strategie=' + strat ,"","width=1200,height=700");
+			// aprire una pagina e nell'url mettere che è dario, quindi che ti permetta di avere l'altra finestra plot attivabile tramite bottone nascosto 
+		}
+
+		function reset(){
+			var f = document.form['frmCerca'];
+			f.elements['dal'].value = '';
+			f.elements['al'].value = '';
+			f.elements['n_contratti'].value = 1;
+			document.getElementsByTagName('col').checked = false;
+		}
+	</script>
+	{% if anni is defined %}
+	<div style="overflow: auto; height: 50%; width: 80%; margin: auto; display: none;" id="unisciequity">
+	<script type="text/javascript">
+		var equity = 0;
+		var _selectIndex = 0;
+		var hwm_first = 0;
+		var drawdown_first = 0;
+		var drawdown_max = 0;
+		var hwm_max=0;
+		var giorni = 0;
+		var max_giorni = 0;
+		var hwm_array = [[]];
+		var dd_roll = [];
+		var dd_roll_ann = [];
+		var  anno_att = {{res[0][1].strftime("%Y")}} ;
+		var mese = {{res[0][4]}} ;
+		var dd_roll_min_anno = 0.0;
+		var mese_att = {{res[0][1].strftime("%m")}} ;
+		var dd_roll_min = 0.0;
+
+		var equity_overall = 0.0; 
+		var dd_roll_overall = 0.0;
+		var loss_m_overall = 0.0;
+		var daily_gain_overall = 0;
+		var daily_loss_overall = 0;
+		var np_overall = 0;
+		var np_dd_overall = 0.0;
+		var ttr_medio_overall = 0.0;
+		var ttr_anni = 0;
+	</script>
+	{% for l in res %}
+		&nbsp;<span style="color: orange">Drawdown:</span><span id="drawdown"></span>
+		<script type="text/javascript">
+			var newBox = document.getElementById('drawdown');
+			newBox.setAttribute("id","pino-"+_selectIndex);
+			var drawdown_prev = drawdown_first + ( {{l.sum_1}} * {{ molt }} );
+			var drawdown_final = 0;
+			if (drawdown_prev < 0){
+				drawdown_final = drawdown_prev;
+			}
+			drawdown_first = drawdown_final;
+			if (drawdown_max > drawdown_first){
+				drawdown_max = drawdown_first;
+			}
+			if (dd_roll_min> drawdown_first){
+				dd_roll_min = drawdown_first;
+			}
+			if (dd_roll_min_anno > dd_roll_min){
+				dd_roll_min_anno = dd_roll_min;
+			}
+			if (anno_att != {{l[1].strftime("%Y")}}) {
+				dd_roll_ann.push(dd_roll_min_anno);
+				dd_roll_min_anno = 0.0
+				anno_att = {{l[1].strftime("%Y")}} ;
+			}
+			if ( mese_att != {{l[1].strftime("%m")}} ){
+				dd_roll.push(dd_roll_min);
+				dd_roll_min = 0.0;
+				mese_att = {{l[1].strftime("%m")}};
+			}
+			document.getElementById("pino-"+_selectIndex).textContent = drawdown_final;
+		</script>
+	{% endfor %}
+	<script type="text/javascript">
+		dd_roll.push(dd_roll_min);
+		dd_roll_ann.push(dd_roll_min_anno);
+		document.getElementById("maxdd").value = drawdown_max.toFixed(2);
+		document.getElementById("loading").style.display = 'none';
+	</script>
+	</div>
+</div>
+<div style=" width: 100%; margin: auto; display: block" id="pivot">
+	<script type="text/javascript">
+		var index_table = 0;
+		var tot_equity_v = 0;
+		var num_operazioni_v = 0;
+		var index_mese = 0;
+		var tot_max_dd_v = 0;
+		var tot_max_loss_v = 0;
+		var tot_max_gain_v = 0;
+		var tot_media_dd_v = 0;
+		var tot_media_gg_v = 0;
+		var tot_avg_trade_v = 0;
+		var tot_avg_trade_v2 = 0;
+		var tot_net_profit_v = 0;
+		var index_dd = 0;
+		var index_dd_anno = 0;
+		var ttr_max_v = 0;
+		var ttr_max_v_mese = 0;
+		var ttr_medio_sum = 0.0;
+	</script>
+	<table class="content-table table-sortable" style="width: 80%; margin: auto; margin-bottom: 20px;">
+		<thead>
+		  <tr>
+		    <th>ANNO</th>
+		    <th>EQUIY</th> <!--- OK --->
+		    <th>MAX DD ROLL</th>
+		    <th>LOSS MONTHLY</th> <!--- OK --->
+		    <th>MAX DAILY GAIN</th> <!--- OK --->
+		    <th>MAX DAILY LOSS</th> <!--- OK --->
+		    <th>AVERAGE TRADE</th> <!--- OK --->
+		    <th>NUMERO OPERAZIONI</th> <!--- OK --->
+		    <th>NP/DD</th> <!---Equity cumulata / max drawdown ----> <!--- OK --->
+		    <th>TIME TO RECOVERY MAX</th> <!--- tempo tra un hwm e l’altro ---->
+		    <th>TIME TO RECOVERY MEDIO</th> <!--- tempo tra un hwm e l’altro ---->
+		  </tr>
+		</thead>
+		<tbody style="font: -webkit-small-control">
+		<tr >
+			<td style="color: blue">TOTALE</td>
+			<td style="color: blue" id="equity_overall"></td>
+			<td style="color: red" id="dd_roll_overall"></td>
+			<td style="color: red" id="loss_m_overall"></td>
+			<td style="color: blue" id="daily_gain_overall"></td>
+			<td style="color: red" id="daily_loss_overall"></td>
+			<td style="color: blue" id="average_overall"></td>
+			<td style="color: blue; padding-left: 40px" id="np_overall"></td>
+			<td style="color: blue" id="np_dd_overall"></td>
+			<td style="color: blue;padding-left: 40px" id="ttr_max_overall"></td>
+			<td style="color: blue;padding-left: 40px" id="ttr_medio_overall"></td>
+		</tr>
+		{% if anni[0][2] != 1%}	
+		<tr onclick="caneF({{anni[0][1]}});" id="{{anni[0][1]}}" style="background-color: #ffeec9 ">
+			<td style="color: blue">{{anni[0][1]}}</td>
+			<td style="color: blue" id="tot_equity"></td>
+			<td style="color: red"> <script type="text/javascript">document.write(dd_roll_ann[0].toFixed(2)); </script> </td>
+			<td style="color: red" id="tot_max_dd"></td>
+			<td style="color: blue" id="tot_max_gain"></td>
+			<td style="color: red" id="tot_max_loss"></td>
+			<td style="color: blue" id="tot_avg_trade"></td>
+			<td style="color: blue; padding-left: 40px" id="tot_operazioni"></td>
+			<td style="color: blue" id="tot_net_profit"></td>
+			<td style="color: blue;padding-left: 40px" id="ttr_max"></td>
+			<td style="color: blue; padding-left: 40px" id="ttr_medio"></td>
+		</tr>
+		{% endif %}
+	 	{% for a in range(len) %}
+	 	{% if anni[a][2] == 1%}
+	 	<tr onclick="caneF({{anni[a][1]}});" id="{{anni[a][1]}}" style="background-color: #ffeec9 ">
+			<td style="color: blue">{{anni[a][1]}}</td>
+			<td style="color: blue" id="tot_equity"></td>
+			<td style="color: red"> <script type="text/javascript">document.write(dd_roll_ann[index_dd_anno].toFixed(2)); index_dd_anno = index_dd_anno + 1; </script> </td>
+			<td style="color: red" id="tot_max_dd"></td>
+			<td style="color: blue" id="tot_max_gain"></td>
+			<td style="color: red" id="tot_max_loss"></td>
+			<td style="color: blue" id="tot_avg_trade"></td>
+			<td style="color: blue; padding-left: 40px" id="tot_operazioni"></td>
+			<td style="color: blue" id="tot_net_profit"></td>
+			<td style="color: blue;padding-left: 40px" id="ttr_max"></td>
+			<td style="color: blue;padding-left: 40px" id="ttr_medio"></td>
+		</tr>
+	 	{% endif %}
+	 	<tr class="cane{{anni[a][1]}}" style="display: none; ">
+			<td>{{ mesi[(anni[a][2])-1][0] }}</td>
+			<td {% if anni[a][0] < 0 %} style="color:red" {% endif %}  >{{"%.2f"|format(anni[a][0] * molt)}}</td>
+			<td style="color: red"> <script type="text/javascript">document.write(dd_roll[index_dd].toFixed(2)); index_dd = index_dd + 1; </script> </td>
+			<td style="color: red">{{"%.2f"|format(dd[a][0])}}</td>
+			<td>{{"%.0f"|format(anni[a][4] * molt )}}</td>
+			<td style="color: red">{{"%.0f"|format(anni[a][3] * molt)}}</td>
+			{% if dd[a][2] != 0 %}
+			{% set divi = (anni[a][0] * molt) /(dd[a][2]) %}
+			{% else %}
+			{% set divi = 0 %}
+			{% endif %}
+			<td {% if divi < 0 %} style="color:red" {% endif %} >{{"%.2f"|format(divi)}}</td>
+			<td style="padding-left: 40px">{{dd[a][2]}}</td>
+			{% if dd[a][0] != 0 %}
+			{% set divi2 = (anni[a][0] * molt) /(dd[a][0]) %}
+			{% else %}
+			{% set divi2 = 0 %}
+			{% endif %}
+			<td {% if -divi2 < 0 %} style="color:red" {% endif %} >{{"%.2f"|format(-divi2)}}</td>
+			<td style="padding-left: 40px">{{ttr[a]}}</td>
+			<td style="padding-left: 40px">{{"%.2f" | format(ttr_medio[a])}}</td>
+		</tr>
+		<script type="text/javascript">
+			index_mese += 1;
+			tot_equity_v += ({{anni[a][0]}} * {{molt}} );
+			num_operazioni_v += {{dd[a][2]}} ;
+			if (tot_max_dd_v > {{dd[a][0]}}){
+				tot_max_dd_v = {{dd[a][0]}} ;
+			}
+			if (tot_max_gain_v < ({{anni[a][4]}} * {{molt}})){
+				tot_max_gain_v = ({{anni[a][4]}} * {{molt}}) ;
+			}
+			if (tot_max_loss_v > ({{anni[a][3]}} * {{molt}})){
+				tot_max_loss_v = ({{anni[a][3]}} * {{molt}}) ;
+			}
+			tot_media_dd_v += {{dd[a][1]}} ;
+			tot_media_gg_v += {{"%.2f"|format(anni[a][5] * molt)}} ;
+			tot_avg_trade_v += {{"%.2f"|format(divi)}} ;
+			tot_net_profit_v += {{"%.2f"|format(-divi2)}} ;
+			if (ttr_max_v < {{ttr[a]}}){
+				ttr_max_v = {{ttr[a]}} ;
+			}
+			if (ttr_max_v_mese < {{ttr[a]}}){
+				ttr_max_v_mese = {{ttr[a]}} ;
+			}
+			ttr_medio_sum += {{ttr_medio[a]}};
+		</script>
+		{% if anni[a][2] == 12  %}
+		<script type="text/javascript">
+			var newBox = document.getElementById('tot_equity');
+			newBox.setAttribute("id","tot_equity-"+index_table);
+			if (tot_equity_v < 0){
+				document.getElementById("tot_equity-"+index_table).style.color = 'red';
+			}
+			document.getElementById("tot_equity-"+index_table).textContent = tot_equity_v.toFixed(2);
+			equity_overall = equity_overall + tot_equity_v;
+			var newBox2 = document.getElementById('tot_operazioni');
+			newBox2.setAttribute("id","tot_operazioni-"+index_table);
+			document.getElementById("tot_operazioni-"+index_table).textContent = num_operazioni_v;
+			np_overall = np_overall + num_operazioni_v;
+			var newBox3 = document.getElementById('tot_max_dd');
+			newBox3.setAttribute("id","tot_max_dd-"+index_table);
+			document.getElementById("tot_max_dd-"+index_table).textContent = tot_max_dd_v.toFixed(2);
+			if (tot_max_dd_v < loss_m_overall){
+				loss_m_overall = tot_max_dd_v;
+			}
+			var newBox4 = document.getElementById('tot_max_loss');
+			newBox4.setAttribute("id","tot_max_loss-"+index_table);
+			document.getElementById("tot_max_loss-"+index_table).textContent = tot_max_loss_v;
+			var newBox5 = document.getElementById('tot_max_gain');
+			newBox5.setAttribute("id","tot_max_gain-"+index_table);
+			document.getElementById("tot_max_gain-"+index_table).textContent = tot_max_gain_v;
+			if (tot_max_loss_v < daily_loss_overall){
+				daily_loss_overall = tot_max_loss_v;
+			}
+			if (tot_max_gain_v > daily_gain_overall){
+				daily_gain_overall = tot_max_gain_v;
+			}
+			tot_media_dd_v = tot_media_dd_v /index_mese;
+			tot_media_gg_v = tot_media_gg_v/index_mese;
+			tot_avg_trade_v2 = tot_equity_v/num_operazioni_v;
+			tot_net_profit_v = tot_net_profit_v/index_mese;
+			var newBox8 = document.getElementById('tot_avg_trade');
+			newBox8.setAttribute("id","tot_avg_trade-"+index_table);
+			if (tot_avg_trade_v2 < 0){
+				document.getElementById("tot_avg_trade-"+index_table).style.color = 'red';
+			}
+			document.getElementById("tot_avg_trade-"+index_table).textContent = tot_avg_trade_v2.toFixed(2).toString();
+			var newBox9 = document.getElementById('tot_net_profit');
+			newBox9.setAttribute("id","tot_net_profit-"+index_table);
+			document.getElementById("tot_net_profit-"+index_table).textContent = tot_net_profit_v.toFixed(2);
+			if (tot_net_profit_v < 0){
+				document.getElementById("tot_net_profit-"+index_table).style.color = 'red';
+			}
+			var newBox10 = document.getElementById('ttr_max');
+			newBox10.setAttribute("id","ttr_max-"+index_table);
+			document.getElementById("ttr_max-"+index_table).textContent = ttr_max_v_mese;
+			var newBox11 = document.getElementById('ttr_medio');
+			newBox11.setAttribute("id","ttr_medio-"+index_table);
+			document.getElementById("ttr_medio-"+index_table).textContent = (ttr_medio_sum/index_mese).toFixed(2);
+			ttr_medio_overall += (ttr_medio_sum/index_mese);
+			ttr_anni+= 1;
+			np_dd_overall += tot_net_profit_v;
+			index_table += 1;
+			tot_equity_v = 0;
+			index_mese = 0;
+			num_operazioni_v = 0;
+			tot_max_dd_v = 0;
+			tot_max_gain_v = 0;
+			tot_max_loss_v = 0;
+			tot_media_dd_v = 0;
+			tot_media_gg_v = 0;
+			tot_avg_trade_v = 0;
+			tot_avg_trade_v2 = 0;
+			tot_net_profit_v = 0;
+			ttr_max_v_mese = 0;
+			ttr_medio_sum = 0.0;
+		</script>
+		{% endif %}
+		{% endfor %}
+		{% if anni[len-1][2] != 12  %}
+		<script type="text/javascript">
+			var newBox = document.getElementById('tot_equity');
+			newBox.setAttribute("id","tot_equity-"+index_table);
+			if (tot_equity_v < 0){
+				document.getElementById("tot_equity-"+index_table).style.color = 'red';
+			}
+			document.getElementById("tot_equity-"+index_table).textContent = tot_equity_v.toFixed(2);
+			equity_overall = equity_overall + tot_equity_v;
+			var newBox2 = document.getElementById('tot_operazioni');
+			newBox2.setAttribute("id","tot_operazioni-"+index_table);
+			document.getElementById("tot_operazioni-"+index_table).textContent = num_operazioni_v;
+			np_overall = np_overall + num_operazioni_v;
+			var newBox3 = document.getElementById('tot_max_dd');
+			newBox3.setAttribute("id","tot_max_dd-"+index_table);
+			document.getElementById("tot_max_dd-"+index_table).textContent = tot_max_dd_v.toFixed(2);
+			if (tot_max_dd_v < loss_m_overall){
+				loss_m_overall = tot_max_dd_v;
+			}
+			var newBox4 = document.getElementById('tot_max_loss');
+			newBox4.setAttribute("id","tot_max_loss-"+index_table);
+			document.getElementById("tot_max_loss-"+index_table).textContent = tot_max_loss_v;
+			var newBox5 = document.getElementById('tot_max_gain');
+			newBox5.setAttribute("id","tot_max_gain-"+index_table);
+			document.getElementById("tot_max_gain-"+index_table).textContent = tot_max_gain_v;
+			if (tot_max_loss_v < daily_loss_overall){
+				daily_loss_overall = tot_max_loss_v;
+			}
+			if (tot_max_gain_v > daily_gain_overall){
+				daily_gain_overall = tot_max_gain_v;
+			}
+			tot_media_dd_v = tot_media_dd_v /index_mese;
+			tot_media_gg_v = tot_media_gg_v/index_mese;
+			tot_avg_trade_v2 = tot_equity_v/num_operazioni_v;
+			tot_net_profit_v = tot_net_profit_v/index_mese;
+			var newBox8 = document.getElementById('tot_avg_trade');
+			newBox8.setAttribute("id","tot_avg_trade-"+index_table);
+			if (tot_avg_trade_v2 < 0){
+				document.getElementById("tot_avg_trade-"+index_table).style.color = 'red';
+			}
+			document.getElementById("tot_avg_trade-"+index_table).textContent = tot_avg_trade_v2.toFixed(2).toString() ;
+			var newBox9 = document.getElementById('tot_net_profit');
+			newBox9.setAttribute("id","tot_net_profit-"+index_table);
+			document.getElementById("tot_net_profit-"+index_table).textContent = tot_net_profit_v.toFixed(2);
+			if (tot_net_profit_v < 0){
+				document.getElementById("tot_net_profit-"+index_table).style.color = 'red';
+			}
+			var newBox10 = document.getElementById('ttr_max');
+			newBox10.setAttribute("id","ttr_max-"+index_table);
+			document.getElementById("ttr_max-"+index_table).textContent = ttr_max_v_mese;
+			var newBox11 = document.getElementById('ttr_medio');
+			newBox11.setAttribute("id","ttr_medio-"+index_table);
+			document.getElementById("ttr_medio-"+index_table).textContent = (ttr_medio_sum/index_mese).toFixed(2);
+			ttr_medio_overall += (ttr_medio_sum/index_mese);
+			ttr_anni+= 1;
+			np_dd_overall += tot_net_profit_v;
+			index_table += 1;
+			tot_equity_v = 0;
+			index_mese = 0;
+			ttr_medio_sum = 0.0;
+			num_operazioni_v = 0;
+			tot_max_dd_v = 0;
+			tot_max_gain_v = 0;
+			tot_max_loss_v = 0;
+			tot_media_dd_v = 0;
+			tot_media_gg_v = 0;
+			tot_avg_trade_v = 0;
+			tot_avg_trade_v2  = 0;
+			tot_net_profit_v = 0;
+			ttr_max_v_mese = 0;
+		</script>
+		<script type="text/javascript">
+			if (equity_overall < 0){
+				document.getElementById("equity_overall").style.color = 'red';
+			}
+			document.getElementById("equity_overall").textContent = equity_overall.toFixed(2);
+			dd_roll_overall = Math.min.apply(null, dd_roll_ann);
+			document.getElementById("dd_roll_overall").textContent = dd_roll_overall.toFixed(2);
+			document.getElementById("loss_m_overall").textContent = loss_m_overall.toFixed(2);
+			document.getElementById("daily_gain_overall").textContent = daily_gain_overall;
+			document.getElementById("daily_loss_overall").textContent = daily_loss_overall;
+			var average_overall = equity_overall/np_overall;
+			if (average_overall < 0){
+				document.getElementById("average_overall").style.color = 'red';
+			}
+			document.getElementById("average_overall").textContent = average_overall.toFixed(2);
+			document.getElementById("np_overall").textContent = np_overall;
+			document.getElementById("np_dd_overall").textContent = (np_dd_overall/(index_dd_anno + 1)).toFixed(2);
+			if (np_dd_overall < 0){
+				document.getElementById("np_dd_overall").style.color = 'red';
+			}
+			document.getElementById("ttr_max_overall").textContent = ttr_max_v;
+			document.getElementById("ttr_medio_overall").textContent =  (ttr_medio_overall/ttr_anni).toFixed(2);
+		</script>
+		{% endif %}
+		</tbody>
+	</table>
+{% endif %}	
+</div>
+<style type="text/css">
+	.content-table{
+		border-collapse: collapse;
+		margin: 25px 0;
+		font-size: 12px;
+		font-family: 'Helvetica';
+		min-width: 400px;
+		border-radius: 5px 5px 0 0;
+		overflow: hidden;
+		box-shadow: 0 0 20px rgba(0,0,0,0.15);
+	}
+
+	.content-table{
+		background-color: orange;
+		color: white;
+		text-align: left;
+		font-weight: bold;
+	}
+
+	.content-table th, .content-table td{
+		padding: 3px 11px;
+	}
+
+	.content-table tbody tr {
+		border-bottom: 1px solid #dddddd;
+		background-color: white;
+		color:black;
+		font-size: 12px;
+		font-family: 'Helvetica';
+	}
+
+	.content-table tbody tr:nth-of-type(even) {
+		background-color: #f3f3f3;
+	}
+
+	.content-table tbody tr:last-of-type {
+		border-bottom: 2px solid orange;
+	}
+	.menu-btn {
+ 	   border-radius: 48px;
+    	border: 0.5px solid lightgrey;
+    	font-size: 0.9em;
+    	padding: 2px 10px;
+    	background-color: white;
+	}
+	.menu {
+    	padding-top: 10px;
+    	z-index: 200;
+    	margin-top: 4px;
+    	background-color: white;
+    	position: absolute;
+	}
+	.menu-option {
+    	padding: 6px 20px 6px;
+	}
+
+</style>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+	// selezione data
+	$( function() {
+		$( "#dal" ).datepicker({ dateFormat: 'yy-mm-dd' });
+		$( "#al" ).datepicker({ dateFormat: 'yy-mm-dd' });
+  	});
+
+	if ("{{ dal }}" ){
+		document.getElementById("dal").value = '{{ dal }}';
+	}
+	if ("{{ al }}" ){
+		document.getElementById("al").value = '{{ al }}';
+	}
+
+	function caneF(anno){
+		var arrayOfElements=document.getElementsByClassName('cane'+anno.toString());
+		var lengthOfArray=arrayOfElements.length;
+		for (var i=0; i<lengthOfArray;i++){
+			if (arrayOfElements[i].style.display == 'none') {
+				arrayOfElements[i].style.display = '';
+			}else{
+				arrayOfElements[i].style.display = 'none';
+			}   
+		}
+	}
+
+</script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+{% endblock %}
+	

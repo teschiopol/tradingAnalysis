@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Dario</title>
+	<meta charset="UTF-8">
+	<script
+  src="https://code.jquery.com/jquery-3.5.1.slim.js"
+  integrity="sha256-DrT5NfxfbHvMHux31Lkhxg42LY6of8TaYyK50jnxRnM="
+  crossorigin="anonymous"></script>
+</head>
+<body>
+	{% block pagebody %}
+	<form action="/cerca" method="POST" style="margin: auto; margin-bottom: 20px;" name="frmCerca">
+		<input type="hidden"  autocomplete="off"  name="dal"  id="dal" value="{{da}}">
+		<input type="hidden"  autocomplete="off"  name="al"  id="al" value="{{a}}">
+   		<input type="hidden" name="n_contratti" id="n_contratti" value="{{contratti}}" autocomplete="off"  required="true">
+   		<input type="hidden" name="flagDario" id="flagDario" value="1">
+   		{% for l in strategie %}
+			<input name="col" value="{{ l[0] }}" id="c{{l[0]}}" type="hidden" checked="true">
+		{% endfor %}
+	</form>
+	<span style="width: 100px; height: 30px; border: 1px red;">Loading...</span>
+	<script type="text/javascript">
+		function myFunction() {
+  			var f = document.forms['frmCerca'];
+			f.action = '/cerca';
+			f.submit();
+		}
+
+		$(document).ready(function(){myFunction();});
+	</script>
+	{% endblock %}
+</body>
+</html>

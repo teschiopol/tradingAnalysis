@@ -1,0 +1,34 @@
+<!--- Template di ogni pagina --->
+
+<html>
+<head>
+    <title>Tracking System</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+</head>
+<body style="margin: 0px;">
+	<div style="width: 100%; background-color: black; ">
+	<div style="width: 80%; height: 10%; margin-bottom: 20px; text-align: center; color: orange; padding-top: 20px; margin:auto; font-size: 25px"><a href="/" style="color: white">Tracking System</a><br>
+		<!---
+		<div style=" float: left; margin-left: 20px;">
+			<a  href='/'/>
+				<button>Unisci Equity</button>
+			</a>
+		</div>
+		<div style=" float: left; margin-left: 20px;">
+			<a  href='/'/>
+				<button>Pivot</button>
+			</a>
+		</div>	
+	-->
+	</div>
+	</div>
+	<div style="margin: 20px 10px 0px 10px;">
+    {% block pagebody %}
+    {% endblock %}
+	</div>
+
+</body>
+</html>
