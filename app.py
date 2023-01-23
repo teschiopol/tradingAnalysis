@@ -9,6 +9,7 @@ import math
 import re
 import random
 import xlsxwriter
+import sys
 
 # dichairo app
 app = Flask(__name__)
@@ -345,5 +346,9 @@ def mid():
 	return render_template('mid.html', strategie = strategie, da=dataI , a=dataF, contratti = contratti)
 # main
 if __name__ == '__main__':
-	app.run(debug=True)
+    app.run(debug=True)
+    debug_opt = False
+    if len(sys.argv) > 1 and sys.argv[1] == 'test':
+        debug_opt = True
+    app.run(debug=debug_opt)
 
