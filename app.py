@@ -63,7 +63,7 @@ def ricerca():
 	numero_contratti = round(float(numero_contratti))
 	if float(numero_contratti) < 1.0:
 		numero_contratti = 1.0
-	if  list_report == [] or list_report[0] == '':
+	if list_report == [] or list_report[0] == '':
 		rep = conn.execute('SELECT name,id from reports order by name')
 	else:	
 		rep = conn.execute(select([reports.c.name,reports.c.id],reports.c.id.in_(list_report)).order_by(reports.c.name))
@@ -72,12 +72,12 @@ def ricerca():
 	for d in rep_iter:
 		rep_iter_single.append(d[1])
 	if data_al == '':
-		data_al =  date.today().strftime("%Y-%m-%d")
+		data_al = date.today().strftime("%Y-%m-%d")
 		data_final = conn.execute(select([func.max(dati.c.data).label('maxdata')], dati.c.idreport.in_(rep_iter_single)))
 		data_al = str(data_final.fetchone()['maxdata'])
 		data_al = datetime.datetime(int(data_al[:4]), int(data_al[5:7]), int(data_al[8:10])).strftime("%Y-%m-%d")
 	if data_dal == '':
-		data_dal =  datetime.datetime(2018, 1, 1).strftime("%Y-%m-%d")
+		data_dal = datetime.datetime(2018, 1, 1).strftime("%Y-%m-%d")
 		data_final = conn.execute(select([func.min(dati.c.data).label('mindata')], dati.c.idreport.in_(rep_iter_single)))
 		data_dal = str(data_final.fetchone()['mindata'])
 		data_dal = datetime.datetime(int(data_dal[:4]), int(data_dal[5:7]), int(data_dal[8:10])).strftime("%Y-%m-%d")
@@ -98,7 +98,7 @@ def ricerca():
 	for x in report:
 		sup_report.append([x.id, x.name, 0])
 	sup_report.pop(0)
-	if  list_report != [] and list_report[0] != '':
+	if list_report != [] and list_report[0] != '':
 		for x in sup_report:
 			if str(x[0]) in list_report:
 				x[2] = 1
@@ -111,9 +111,9 @@ def ricerca():
 	num_op = 0
 	acc = pivot_data[0][2]
 	mesi = [['Gennaio',31], ['Febbraio',28], ['Marzo',31], ['Aprile',30], ['Maggio',31], ['Giugno',30], ['Luglio',31], ['Agosto',31], ['Settembre',30], ['Ottobre',31], ['Novembre',30], ['Dicembre',31]]
-	mese = 	pivot_data[0][1].strftime("%-m") 
+	mese = pivot_data[0][1].strftime("%-m") 
 	for d in pivot_data:
-		if 	d[1].strftime("%-m") == mese:
+		if d[1].strftime("%-m") == mese:
 			num_op = d[2] - acc
 		drawdown_prev = drawdown_first + (d[0] * numero_contratti)
 		drawdown_final = 0
@@ -123,7 +123,7 @@ def ricerca():
 		drawdown_first = drawdown_final
 		if drawdown_max > drawdown_first:
 			drawdown_max = drawdown_first
-		if 	d[1].strftime("%-m") != mese:
+		if d[1].strftime("%-m") != mese:
 			drawdown_list.append([drawdown_max, round((drawdown_sum/mesi[int(mese)-1][1]),2), num_op])
 			acc += num_op
 			drawdown_first = 0
@@ -147,7 +147,7 @@ def ricerca():
 			if ttr_div == 0:
 				ttr_acc = 0
 			else :	
-				ttr_acc = ttr_acc / ttr_div;
+				ttr_acc = ttr_acc / ttr_div
 			ttr_medio.append(ttr_acc)
 			ttr_acc = 0
 			ttr_div = 0
@@ -224,14 +224,14 @@ def graph():
 			sup_query = list(sup_query)
 			master_ret.append(sup_query)
 		nome_sup_query = conn.execute(select([reports.c.id, reports.c.name], reports.c.id.in_(strategie)))
-		nome_sup_query =  list(nome_sup_query)
+		nome_sup_query = list(nome_sup_query)
 	else:
 		for x in strategie:
 			sup_query = conn.execute(select([func.sum(dati.c.daily_profit_loss), dati.c.anno, dati.c.mese ]).where(and_(dati.c.data >= dataI, dati.c.idreport == x, dati.c.data <= dataF)).group_by(dati.c.anno,dati.c.mese).order_by(dati.c.anno,dati.c.mese))
 			sup_query = list(sup_query)
 			master_ret.append(sup_query)
 		nome_sup_query = conn.execute(select([reports.c.id, reports.c.name], reports.c.id.in_(strategie)))
-		nome_sup_query =  list(nome_sup_query)
+		nome_sup_query = list(nome_sup_query)
 		res = conn.execute(select([func.sum(dati.c.daily_profit_loss), dati.c.anno, dati.c.mese ],dati.c.idreport.in_(strategie)).where(and_(dati.c.data >= dataI, dati.c.data <= dataF)).group_by(dati.c.anno,dati.c.mese).order_by(dati.c.anno,dati.c.mese))	
 	
 	res_all = list(res)
@@ -313,10 +313,10 @@ def darietto():
 	strategie = strategie.split(",")
 	if strategie[0] == '0':
 		nome_sup_query = conn.execute(select([reports.c.id, reports.c.name]))
-		strategie =  list(nome_sup_query)
+		strategie = list(nome_sup_query)
 	else:
 		nome_sup_query = conn.execute(select([reports.c.id, reports.c.name], reports.c.id.in_(strategie)))
-		strategie =  list(nome_sup_query)
+		strategie = list(nome_sup_query)
 	conn.close()
 
 	# 
@@ -338,10 +338,10 @@ def mid():
 	strategie = strategie.split(",")
 	if strategie[0] == '0':
 		nome_sup_query = conn.execute(select([reports.c.id, reports.c.name]))
-		strategie =  list(nome_sup_query)
+		strategie = list(nome_sup_query)
 	else:
 		nome_sup_query = conn.execute(select([reports.c.id, reports.c.name], reports.c.id.in_(strategie)))
-		strategie =  list(nome_sup_query)
+		strategie = list(nome_sup_query)
 	conn.close()
 	return render_template('mid.html', strategie = strategie, da=dataI , a=dataF, contratti = contratti)
 # main
