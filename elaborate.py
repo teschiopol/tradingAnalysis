@@ -1,8 +1,8 @@
 import xlsxwriter
-import re
-import sys
-import datetime
-from time import sleep
+# import re
+# import sys
+# import datetime
+# from time import sleep
 from os import listdir
 from os.path import isfile, join
 
@@ -52,12 +52,12 @@ if __name__ == '__main__':
 
 '''
 
-workbook = xlsxwriter.Workbook('proget.xlsx') # nome file
-worksheet1 = workbook.add_worksheet('unisci_equity') # nome primo foglio
-worksheet2 = workbook.add_worksheet('pivot') # nome secondo figlio
-worksheet3 = workbook.add_worksheet('single_drawdown') # nome terzo foglio
-worksheet4 = workbook.add_worksheet('single_equity') # nome terzo foglio
-worksheet5 = workbook.add_worksheet('ptf') # nome terzo foglio
+workbook = xlsxwriter.Workbook('proget.xlsx')  # nome file
+worksheet1 = workbook.add_worksheet('unisci_equity')  # nome primo foglio
+worksheet2 = workbook.add_worksheet('pivot')  # nome secondo figlio
+worksheet3 = workbook.add_worksheet('single_drawdown')  # nome terzo foglio
+worksheet4 = workbook.add_worksheet('single_equity')  # nome terzo foglio
+worksheet5 = workbook.add_worksheet('ptf')  # nome terzo foglio
 
 workbook.close()
 
@@ -65,11 +65,3 @@ mypath = 'reports/'
 
 onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
 print(onlyfiles)
-
-
-
-
-
-
-
-

@@ -1,34 +1,34 @@
 from sqlalchemy import *
-from app import engine, metadata
+from app import metadata
 from os import listdir
 from os.path import isfile, join
-import re
-import datetime
+
+# import re
+# import datetime
 
 mypath = 'reports/'
 
 onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
 onlyfiles = onlyfiles[1:]
 
-
 # creazione tabelle
 reports = Table('reports', metadata,
-	Column('id', Integer, primary_key = True),
-	Column('name', String)
-)
+                Column('id', Integer, primary_key=True),
+                Column('name', String)
+                )
 
 dati = Table('dati', metadata,
-	Column('id', Integer, primary_key = True),
-	Column('idreport', Integer),
-	Column('data', Date),
-	Column('daily_profit_loss', Float),
-	Column('n_contratti', Integer),
-	Column('gap', Float),
-	Column('daily_range', Float),
-	Column('somma_trade', Integer),
-	Column('mese', Integer),
-	Column('anno', Integer)
-)
+             Column('id', Integer, primary_key=True),
+             Column('idreport', Integer),
+             Column('data', Date),
+             Column('daily_profit_loss', Float),
+             Column('n_contratti', Integer),
+             Column('gap', Float),
+             Column('daily_range', Float),
+             Column('somma_trade', Integer),
+             Column('mese', Integer),
+             Column('anno', Integer)
+             )
 
 '''
 #inizializzo database e creo tabelle
