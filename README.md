@@ -1,6 +1,6 @@
-[![CodeFactor](https://www.codefactor.io/repository/github/teschiopol/tradinganalysis/badge)](https://www.codefactor.io/repository/github/teschiopol/tradinganalysis)
-
 # 📊 Trading Analysis
+
+[![CodeFactor](https://www.codefactor.io/repository/github/teschiopol/tradinganalysis/badge)](https://www.codefactor.io/repository/github/teschiopol/tradinganalysis)
 
 Track and manage data.
 

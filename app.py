@@ -53,6 +53,38 @@ def home():
     return render_template('index.html', reports=report, res='', n_report=0, tot_report=len(report))
 
 
+# Drawdown
+def drawdown(pivot_data, numero_contratti):
+    drawdown_first = 0
+    drawdown_max = 0
+    drawdown_sum = 0
+    drawdown_list = [[]]
+    num_op = 0
+    acc = pivot_data[0][2]
+    mesi = [['Gennaio', 31], ['Febbraio', 28], ['Marzo', 31], ['Aprile', 30], ['Maggio', 31], ['Giugno', 30],
+            ['Luglio', 31], ['Agosto', 31], ['Settembre', 30], ['Ottobre', 31], ['Novembre', 30], ['Dicembre', 31]]
+    mese = pivot_data[0][1].strftime("%-m")
+    for d in pivot_data:
+        if d[1].strftime("%-m") == mese:
+            num_op = d[2] - acc
+        drawdown_prev = drawdown_first + (d[0] * numero_contratti)
+        drawdown_final = 0
+        if drawdown_prev < 0:
+            drawdown_sum += drawdown_prev
+            drawdown_final = drawdown_prev
+        drawdown_first = drawdown_final
+        if drawdown_max > drawdown_first:
+            drawdown_max = drawdown_first
+        if d[1].strftime("%-m") != mese:
+            drawdown_list.append([drawdown_max, round((drawdown_sum / mesi[int(mese) - 1][1]), 2), num_op])
+            acc += num_op
+            drawdown_first = 0
+            drawdown_max = 0
+            drawdown_sum = 0
+            mese = d[1].strftime("%-m")
+    return [drawdown_list, drawdown_max, drawdown_sum, mesi, mese, num_op]
+
+
 @app.route('/cerca', methods=['GET', 'POST'])
 def ricerca():
     conn = engine.connect()
@@ -115,34 +147,7 @@ def ricerca():
             if str(x[0]) in list_report:
                 x[2] = 1
 
-    # drawdown
-    drawdown_first = 0
-    drawdown_max = 0
-    drawdown_sum = 0
-    drawdown_list = [[]]
-    num_op = 0
-    acc = pivot_data[0][2]
-    mesi = [['Gennaio', 31], ['Febbraio', 28], ['Marzo', 31], ['Aprile', 30], ['Maggio', 31], ['Giugno', 30],
-            ['Luglio', 31], ['Agosto', 31], ['Settembre', 30], ['Ottobre', 31], ['Novembre', 30], ['Dicembre', 31]]
-    mese = pivot_data[0][1].strftime("%-m")
-    for d in pivot_data:
-        if d[1].strftime("%-m") == mese:
-            num_op = d[2] - acc
-        drawdown_prev = drawdown_first + (d[0] * numero_contratti)
-        drawdown_final = 0
-        if drawdown_prev < 0:
-            drawdown_sum += drawdown_prev
-            drawdown_final = drawdown_prev
-        drawdown_first = drawdown_final
-        if drawdown_max > drawdown_first:
-            drawdown_max = drawdown_first
-        if d[1].strftime("%-m") != mese:
-            drawdown_list.append([drawdown_max, round((drawdown_sum / mesi[int(mese) - 1][1]), 2), num_op])
-            acc += num_op
-            drawdown_first = 0
-            drawdown_max = 0
-            drawdown_sum = 0
-            mese = d[1].strftime("%-m")
+    res_drawdown = drawdown(pivot_data, numero_contratti)
 
     ttr_min = 0.00
     ttr_max = 0.00
@@ -184,9 +189,9 @@ def ricerca():
         ttr_equity += (d[0] * numero_contratti)
     ttr_medio.append(ttr_acc)
     ttr.append(ttr_time_max)
-    drawdown_list.pop(0)
+    res_drawdown[0].pop(0)
     html_sup = sup_report
-    drawdown_list.append([drawdown_max, round((drawdown_sum / mesi[int(mese) - 1][1]), 2), num_op])
+    res_drawdown[0].append([res_drawdown[1], round((res_drawdown[2] / res_drawdown[3][int(res_drawdown[4]) - 1][1]), 2), res_drawdown[5]])
 
     '''
     # Create and insert data first report
@@ -212,9 +217,9 @@ def ricerca():
     '''
 
     return render_template('index.html', reports=report, rep=rep_iter, res=unisci_data, dal=data_dal, al=data_al,
-                           anni=mes_ann, mesi=mesi, len=len(mes_ann), dd=drawdown_list, ttr=ttr, ttr_medio=ttr_medio,
-                           molt=numero_contratti, html_sup=html_sup, n_report=len(rep_iter), tot_report=len(report),
-                           darietto=flagdario)
+                           anni=mes_ann, mesi=res_drawdown[3], len=len(mes_ann), dd=res_drawdown[0], ttr=ttr,
+                           ttr_medio=ttr_medio, molt=numero_contratti, html_sup=html_sup, n_report=len(rep_iter),
+                           tot_report=len(report), darietto=flagdario)
 
 
 @app.route('/plot', methods=['GET', 'POST'])
